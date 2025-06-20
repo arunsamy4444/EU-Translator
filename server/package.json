@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@google-cloud/translate": "^9.1.0",
+    "axios": "^1.10.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.0",
+    "node-fetch": "^2.7.0",
+    "nodemon": "^3.1.10",
+    "react-i18next": "^15.5.3"
+  }
+}
