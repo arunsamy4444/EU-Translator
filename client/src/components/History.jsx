@@ -1,135 +1,138 @@
-import React, { useEffect, useState } from "react";
-import { euLanguages } from "./Languages";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-export default function History({ user }) {
-  const [data, setData] = useState([]);
+const History = ({ userId }) => {
+  const [prompts, setPrompts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const getLangName = (code) => {
-    const match = euLanguages.find((l) => l.code === code);
-    return match ? match.name : code;
+  const fetchHistory = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/prompts/${userId}`);
+      setPrompts(res.data.reverse()); // latest first
+    } catch (err) {
+      console.error('Failed to fetch history', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const loadHistory = async () => {
-    const res = await fetch("http://localhost:5000/history/" + user._id);
-    const json = await res.json();
-    setData(json.reverse()); // latest first
-  };
-
-  const del = async (id) => {
-    await fetch("http://localhost:5000/history/" + id, { method: "DELETE" });
-    loadHistory();
-  };
-
-  const formatDate = (date) => {
-    return new Date(date).toLocaleString();
+  const deletePrompt = async (id) => {
+    await axios.delete(`http://localhost:5000/api/prompts/${userId}/${id}`);
+    fetchHistory();
   };
 
   useEffect(() => {
-    loadHistory();
+    fetchHistory();
   }, []);
 
-  return (
-    <div className="history-container">
-      <h2 className="history-title">📜 Translation History</h2>
-      {data.length === 0 ? (
-        <p className="no-history">No history yet.</p>
-      ) : (
-        data.map((item) => (
-          <div key={item._id} className="history-card">
-            <p><strong>From:</strong> {getLangName(user.nativeLang)}</p>
-            <p><strong>To:</strong> {getLangName(item.targetLang)}</p>
-            <p><strong>Input:</strong> <span className="code-text">{item.inputText}</span></p>
-            <p><strong>Output:</strong> <span className="code-text">{item.translatedText}</span></p>
-            <p><strong>Date:</strong> {formatDate(item.date)}</p>
-            <button onClick={() => del(item._id)} className="delete-btn">🗑️ Delete</button>
-          </div>
-        ))
-      )}
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
 
+  if (loading) {
+    return <p style={{ textAlign: 'center', color: '#bbb' }}>Loading history...</p>;
+  }
+return (
+    <div className="history-wrapper">
       <style>{`
-        .history-container {
-          max-width: 800px;
-          margin: 50px auto;
-          padding: 30px;
-          background: rgba(30, 30, 40, 0.75);
-          border-radius: 18px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-          color: #eee;
-          font-family: 'Segoe UI', sans-serif;
-          backdrop-filter: blur(12px);
-          animation: fadeIn 0.6s ease;
-        }
-
-        .history-title {
-          text-align: center;
-          font-size: 2rem;
-          margin-bottom: 30px;
-          background: linear-gradient(to right, #00f2fe, #4facfe);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .no-history {
-          text-align: center;
-          color: #ccc;
-          font-style: italic;
-        }
-
-        .history-card {
-          background: rgba(255, 255, 255, 0.05);
-          border-left: 4px solid #00f2fe;
-          padding: 20px;
-          border-radius: 12px;
-          margin-bottom: 20px;
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-          transition: transform 0.3s ease;
-        }
-
-        .history-card:hover {
-          transform: translateY(-3px);
-        }
-
-        .history-card p {
-          margin: 6px 0;
-        }
-
-        .code-text {
-          font-family: monospace;
+        .history-wrapper {
+          min-height: 100vh;
+          padding: 2rem;
+          font-family: 'Poppins', sans-serif;
+          background: radial-gradient(circle at 30% 30%, #0f0c29, #302b63, #24243e);
           color: #fff;
-          background: rgba(255, 255, 255, 0.08);
-          padding: 4px 8px;
-          border-radius: 4px;
         }
-
-        .delete-btn {
-          margin-top: 10px;
-          padding: 8px 14px;
-          background: linear-gradient(to right, #ff416c, #ff4b2b);
-          color: white;
+        .history-item {
+          background: rgba(255, 255, 255, 0.06);
+          padding: 1rem;
+          margin-bottom: 1.5rem;
+          border-radius: 16px;
+          box-shadow: 0 0 15px #ec9aec;
+          animation: fadeInItem 0.5s ease;
+        }
+        .history-item p {
+          margin: 0.5rem 0;
+        }
+        .history-item strong {
+          color: #ec9aec;
+        }
+        .btn-delete {
+          background: linear-gradient(135deg, #ff6b81, #ff4757);
           border: none;
-          border-radius: 6px;
+          border-radius: 14px;
+          padding: 0.5rem 1rem;
+          color: white;
+          font-weight: bold;
           cursor: pointer;
-          font-weight: 600;
-          transition: transform 0.2s ease, background 0.3s ease;
+          margin-top: 0.5rem;
+          box-shadow: 0 0 10px #ff6b81;
+          transition: 0.3s ease;
         }
-
-        .delete-btn:hover {
+        .btn-delete:hover {
           transform: scale(1.05);
-          opacity: 0.9;
+          box-shadow: 0 0 20px #ff6b81;
         }
-
-        @keyframes fadeIn {
+        @keyframes fadeInItem {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
-
-        @media (max-width: 600px) {
-          .history-container {
-            padding: 20px;
-            margin: 20px;
+        @media (max-width: 480px) {
+          .history-wrapper {
+            padding: 1rem;
+          }
+          .btn-delete {
+            width: 100%;
           }
         }
       `}</style>
+
+      {loading ? (
+        <p style={{ textAlign: 'center', color: '#bbb' }}>Loading history...</p>
+      ) : prompts.length === 0 ? (
+        <p style={{ textAlign: 'center', opacity: 0.6 }}>No history yet.</p>
+      ) : (
+        prompts.map((p) => (
+          <div key={p._id} className="history-item">
+            <p><strong>{p.userInput}</strong> → {p.aiResponse}</p>
+            <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+              From: <strong>{p.inputLanguage}</strong> ➝ To: <strong>{p.outputLanguage}</strong> | {formatDate(p.createdAt)}
+            </p>
+            <button className="btn-delete" onClick={() => deletePrompt(p._id)}>🗑️ Delete</button>
+          </div>
+        ))
+      )}
     </div>
   );
-}
+
+  // return (
+  //   <div className="history-wrapper" style={{ marginTop: '2rem' }}>
+  //     {prompts.length === 0 ? (
+  //       <p style={{ textAlign: 'center', opacity: 0.6 }}>No history yet.</p>
+  //     ) : (
+  //       prompts.map((p) => (
+  //         <div key={p._id} className="history-item" style={{
+  //           background: 'rgba(255, 255, 255, 0.05)',
+  //           marginBottom: '1rem',
+  //           padding: '1rem',
+  //           borderRadius: '14px',
+  //           boxShadow: '0 0 10px rgba(255, 0, 255, 0.2)',
+  //           transition: 'all 0.3s',
+  //           animation: 'fadeIn 0.5s ease'
+  //         }}>
+  //           <p style={{ marginBottom: '0.5rem' }}>
+  //             <strong>{p.userInput}</strong> → <span>{p.aiResponse}</span>
+  //           </p>
+  //           <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+  //             From: <strong>{p.inputLanguage}</strong> ➝ To: <strong>{p.outputLanguage}</strong> | {formatDate(p.createdAt)}
+  //           </p>
+  //        <button className="btn-delete" onClick={() => deletePrompt(p._id)}>🗑️ Delete</button>
+
+  //         </div>
+  //       ))
+  //     )}
+  //   </div>
+  // );
+};
+
+export default History;

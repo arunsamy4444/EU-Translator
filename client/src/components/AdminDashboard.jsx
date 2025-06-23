@@ -1,628 +1,206 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-export default function AdminDashboard() {
+const AdminDashboard = ({ user, onLogout }) => {
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [prompts, setPrompts] = useState([]);
-  const [showPrompts, setShowPrompts] = useState(false);
-  const [activeUserId, setActiveUserId] = useState(null);
-
-  const fetchUsers = async () => {
-    const res = await fetch("http://localhost:5000/admin/users");
-    const json = await res.json();
-    setUsers(json);
-  };
-
-  const delUser = async (id) => {
-    await fetch("http://localhost:5000/admin/users/" + id, { method: "DELETE" });
-    fetchUsers();
-    setPrompts([]);
-    setShowPrompts(false);
-  };
-
-  const viewPrompts = async (userId) => {
-    // Toggle same user (hide if already active)
-    if (showPrompts && activeUserId === userId) {
-      setShowPrompts(false);
-      setPrompts([]);
-      setActiveUserId(null);
-      return;
-    }
-
-    const res = await fetch("http://localhost:5000/admin/prompts/" + userId);
-    const json = await res.json();
-    setPrompts(json);
-    setShowPrompts(true);
-    setActiveUserId(userId);
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.reload(); // redirect to login
-  };
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/admin/users', {
+          params: { email: user.email, password: 'admin' },
+        });
+        setUsers(res.data);
+      } catch (err) {
+        console.error('Failed to fetch users:', err);
+      }
+    };
     fetchUsers();
-  }, []);
+  }, [user]);
+
+  const handleUserPrompts = async (userObj) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/prompts/${userObj._id}`);
+      setSelectedUser(userObj);
+      setPrompts(res.data);
+    } catch (err) {
+      console.error('Failed to fetch prompts:', err);
+    }
+  };
+
+  const deleteUser = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
+        params: { email: user.email, password: 'admin' },
+      });
+      setUsers(prev => prev.filter(u => u._id !== id));
+      if (selectedUser && selectedUser._id === id) {
+        setSelectedUser(null);
+        setPrompts([]);
+      }
+    } catch (err) {
+      console.error('Failed to delete user:', err);
+    }
+  };
+
 
   return (
-    <div className="admin-container">
-      <div className="admin-header">
-        <h2 className="admin-title">🛠️ Admin Dashboard</h2>
-        <button className="logout-btn" onClick={handleLogout}>🚪 Logout</button>
-      </div>
-
-      <div className="user-list">
-        {users.map((u) => (
-          <div key={u._id} className="user-card">
-            <div className="user-info">
-              <p><strong>📧 Email:</strong> {u.email}</p>
-              <p><strong>🗣️ Native Lang:</strong> {u.nativeLang}</p>
-            </div>
-            <div className="btn-group">
-              <button onClick={() => delUser(u._id)} className="btn danger">Delete</button>
-              <button onClick={() => viewPrompts(u._id)} className="btn view">
-                {showPrompts && activeUserId === u._id ? "Hide Prompts" : "View Prompts"}
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {showPrompts && prompts.length > 0 && (
-        <div className="prompt-section">
-          <h3>📜 Prompt History</h3>
-          <ul>
-            {prompts.map((p) => (
-              <li key={p._id}>
-                <code>{p.inputText}</code> <b>→</b> <code>{p.translatedText}</code>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
+    <div className="signup-wrapper">
       <style>{`
-        .admin-container {
-          max-width: 960px;
-          margin: 60px auto;
-          padding: 40px;
+        .signup-wrapper {
+          min-height: 100vh;
+          padding: 2rem;
+          background: radial-gradient(circle at 30% 30%, #0f0c29, #302b63, #24243e);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-family: 'Poppins', sans-serif;
+        }
+        .signup-card {
+          background: rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(15px);
+          padding: 2rem;
           border-radius: 20px;
-          background: rgba(30, 30, 40, 0.85);
-          backdrop-filter: blur(12px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-          color: #eee;
-          animation: fadeIn 0.6s ease;
+          max-width: 900px;
+          width: 100%;
+          color: #fff;
+          box-shadow: 0 0 25px #ec9aec;
+          animation: fadeInCard 0.8s ease;
         }
-
-        .admin-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 30px;
+        h2 {
+          text-align: center;
+          color: #ec9aec;
+          margin-bottom: 1rem;
+          text-shadow: 0 0 10px #fff, 0 0 20px #ec9aec;
         }
-
-        .admin-title {
-          font-size: 2.5rem;
-          background: linear-gradient(to right, #00c6ff, #0072ff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+        h3 {
+          margin-top: 1.5rem;
+          color: #ffd6ff;
         }
-
-   .logout-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: linear-gradient(45deg, #f12711, #f5af19);
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 10;
-}
-
-.logout-btn:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-
-        .user-list {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-
-        .user-card {
-          background: rgba(255,255,255,0.05);
-          padding: 20px 25px;
-          border-radius: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-          transition: transform 0.3s ease;
-        }
-
-        .user-card:hover {
-          transform: translateY(-4px);
-        }
-
-        .user-info p {
-          margin: 6px 0;
-          font-size: 1rem;
-        }
-
-        .btn-group {
-          display: flex;
-          gap: 12px;
-        }
-
-        .btn {
-          padding: 10px 18px;
-          font-weight: bold;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
+        .box-card, .history-item {
+          background: rgba(255, 255, 255, 0.08);
+          padding: 1rem;
+          border-radius: 14px;
+          margin-bottom: 1rem;
+          box-shadow: 0 0 10px #ec9aec40;
           transition: transform 0.2s ease;
         }
-
-        .btn.view {
-          background: linear-gradient(45deg, #06beb6, #48b1bf);
-          color: white;
+        .box-card:hover {
+          transform: scale(1.02);
         }
-
-        .btn.danger {
-          background: linear-gradient(to right, #ff416c, #ff4b2b);
-          color: white;
-        }
-
-        .btn:hover {
-          transform: scale(1.05);
-          opacity: 0.9;
-        }
-
-        .prompt-section {
-          margin-top: 50px;
-          padding: 20px;
-          background: rgba(255,255,255,0.06);
-          border-radius: 14px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-
-        .prompt-section h3 {
-          margin-bottom: 18px;
+        .box-card button, .logout-button {
+          margin-left: 0.6rem;
+          padding: 0.5rem 1rem;
+          background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+          border: none;
+          border-radius: 12px;
           color: #fff;
+          cursor: pointer;
+          font-weight: bold;
+          transition: 0.3s;
         }
-
-        .prompt-section ul {
-          list-style: none;
-          padding-left: 0;
+        .logout-button {
+          display: block;
+          margin: 1rem auto;
+          background: linear-gradient(135deg, #ff7675, #e84393);
         }
-
-        .prompt-section li {
-          background: rgba(0, 0, 0, 0.2);
-          margin-bottom: 10px;
-          padding: 10px;
-          border-left: 4px solid #0072ff;
-          border-radius: 6px;
-          font-family: monospace;
-          font-size: 0.95rem;
-          color: #e0f7fa;
+        .box-card button:hover, .logout-button:hover {
+          box-shadow: 0 0 12px #ec9aec;
         }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(15px); }
+        .history-item p {
+          margin: 0.3rem 0;
+        }
+        @keyframes fadeInCard {
+          from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+      `}</style>
 
-        @media (max-width: 768px) {
-          .admin-header {
-            flex-direction: column;
-            gap: 16px;
-          }
+      <div className="signup-card">
+        <h2>🛡️ Admin Dashboard</h2>
+        <button className="logout-button" onClick={onLogout}>Logout</button>
 
-          .user-card {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .btn-group {
-            width: 100%;
-            justify-content: flex-start;
-          }
-
-          .btn {
-            width: 100%;
-          }
-        }
-     `}</style>
+        {!selectedUser ? (
+          <>
+            <h3>👤 Total Users: {users.length}</h3>
+            {users.map(u => (
+              <div key={u._id} className="box-card">
+                <strong>{u.email}</strong>
+                <button onClick={() => handleUserPrompts(u)}>📂 View Prompts</button>
+                <button onClick={() => deleteUser(u._id)}>🗑️ Delete</button>
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <h3>📂 Prompts by: {selectedUser.email}</h3>
+            <button className="logout-button" onClick={() => {
+              setSelectedUser(null);
+              setPrompts([]);
+            }}>🔙 Back to Users</button>
+            {prompts.length === 0 ? (
+              <p style={{ opacity: 0.6, marginTop: '1rem' }}>No prompts found for this user.</p>
+            ) : (
+              prompts.map(p => (
+                <div key={p._id} className="history-item">
+                  <p><strong>{p.userInput}</strong> → <em>{p.aiResponse}</em></p>
+                  <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>
+                    {p.inputLanguage} ➝ {p.outputLanguage} | {new Date(p.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
-}
+  // return (
+  //   <div style={{ padding: '2rem', fontFamily: 'sans-serif', color: '#fff' }}>
+  //     <h2 style={{ color: '#ff00ff', textShadow: '0 0 10px #ff00ff' }}>🛡️ Admin Dashboard</h2>
+  //     <button onClick={onLogout} className="logout-button">Logout</button>
 
+  //     {!selectedUser ? (
+  //       <div style={{ marginTop: '2rem' }}>
+  //         <h3>👤 Total Users: {users.length}</h3>
+  //         {users.map(u => (
+  //           <div key={u._id} className="box-card">
+  //             <strong>{u.email}</strong>
+  //             <button onClick={() => handleUserPrompts(u)} style={{ marginLeft: '1rem' }}>
+  //               📂 View Prompts
+  //             </button>
+  //             <button onClick={() => deleteUser(u._id)} style={{ marginLeft: '1rem' }}>
+  //               🗑️ Delete
+  //             </button>
+  //           </div>
+  //         ))}
+  //       </div>
+  //     ) : (
+  //       <div style={{ marginTop: '2rem' }}>
+  //         <h3>📂 Prompts by: {selectedUser.email}</h3>
+  //         <button onClick={() => {
+  //           setSelectedUser(null);
+  //           setPrompts([]);
+  //         }}>🔙 Back to Users</button>
 
-// import React, { useEffect, useState } from "react";
+  //         {prompts.length === 0 ? (
+  //           <p style={{ marginTop: '1rem' }}>No prompts found for this user.</p>
+  //         ) : (
+  //           prompts.map(p => (
+  //             <div key={p._id} className="history-item">
+  //               <p><strong>{p.userInput}</strong> → <em>{p.aiResponse}</em></p>
+  //               <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+  //                 {p.inputLanguage} ➝ {p.outputLanguage} | {new Date(p.createdAt).toLocaleString()}
+  //               </p>
+  //             </div>
+  //           ))
+  //         )}
+  //       </div>
+  //     )}
+  //   </div>
+  // );
+};
 
-// export default function AdminDashboard() {
-//   const [users, setUsers] = useState([]);
-//   const [prompts, setPrompts] = useState([]);
-
-//   const fetchUsers = async () => {
-//     const res = await fetch("http://localhost:5000/admin/users");
-//     const json = await res.json();
-//     setUsers(json);
-//   };
-
-//   const delUser = async (id) => {
-//     await fetch("http://localhost:5000/admin/users/" + id, { method: "DELETE" });
-//     fetchUsers();
-//     setPrompts([]);
-//   };
-
-//   const viewPrompts = async (userId) => {
-//     const res = await fetch("http://localhost:5000/admin/prompts/" + userId);
-//     const json = await res.json();
-//     setPrompts(json);
-//   };
-//   const handleLogout = () => {
-//     localStorage.clear();
-//     window.location.reload(); // redirect to login
-//   };
-//   useEffect(() => {
-//     fetchUsers();
-//   }, []);
-
-//   return (
-//        <div className="admin-container">
-//       <div className="admin-header">
-//         <h2 className="admin-title">🛠️ Admin Dashboard</h2>
-//         <button className="logout-btn" onClick={handleLogout}>🚪 Logout</button>
-//       </div>
-
-//       <div className="user-list">
-//         {users.map((u) => (
-//           <div key={u._id} className="user-card">
-//             <div className="user-info">
-//               <p><strong>📧 Email:</strong> {u.email}</p>
-//               <p><strong>🗣️ Native Lang:</strong> {u.nativeLang}</p>
-//             </div>
-//             <div className="btn-group">
-//               <button onClick={() => delUser(u._id)} className="btn danger">Delete</button>
-//               <button onClick={() => viewPrompts(u._id)} className="btn view">View Prompts</button>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-
-//       {prompts.length > 0 && (
-//         <div className="prompt-section">
-//           <h3>📜 Prompt History</h3>
-//           <ul>
-//             {prompts.map((p) => (
-//               <li key={p._id}>
-//                 <code>{p.inputText}</code> <b>→</b> <code>{p.translatedText}</code>
-//               </li>
-//             ))}
-//           </ul>
-//         </div>
-//       )}
-
-//       <style>{`
-//         .admin-container {
-//           max-width: 960px;
-//           margin: 60px auto;
-//           padding: 40px;
-//           border-radius: 20px;
-//           background: rgba(30, 30, 40, 0.85);
-//           backdrop-filter: blur(12px);
-//           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-//           color: #eee;
-//           animation: fadeIn 0.6s ease;
-//         }
-
-//         .admin-header {
-//           display: flex;
-//           justify-content: space-between;
-//           align-items: center;
-//           margin-bottom: 30px;
-//         }
-
-//         .admin-title {
-//           font-size: 2.5rem;
-//           background: linear-gradient(to right, #00c6ff, #0072ff);
-//           -webkit-background-clip: text;
-//           -webkit-text-fill-color: transparent;
-//         }
-
-//         .logout-btn {
-//           background: linear-gradient(45deg, #f12711, #f5af19);
-//           color: white;
-//           border: none;
-//           padding: 10px 18px;
-//           border-radius: 8px;
-//           font-weight: bold;
-//           cursor: pointer;
-//           transition: all 0.3s ease;
-//         }
-
-//         .logout-btn:hover {
-//           transform: scale(1.05);
-//           opacity: 0.9;
-//         }
-
-//         .user-list {
-//           display: flex;
-//           flex-direction: column;
-//           gap: 20px;
-//         }
-
-//         .user-card {
-//           background: rgba(255,255,255,0.05);
-//           padding: 20px 25px;
-//           border-radius: 12px;
-//           display: flex;
-//           justify-content: space-between;
-//           align-items: center;
-//           box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-//           transition: transform 0.3s ease;
-//         }
-
-//         .user-card:hover {
-//           transform: translateY(-4px);
-//         }
-
-//         .user-info p {
-//           margin: 6px 0;
-//           font-size: 1rem;
-//         }
-
-//         .btn-group {
-//           display: flex;
-//           gap: 12px;
-//         }
-
-//         .btn {
-//           padding: 10px 18px;
-//           font-weight: bold;
-//           border: none;
-//           border-radius: 8px;
-//           cursor: pointer;
-//           transition: transform 0.2s ease;
-//         }
-
-//         .btn.view {
-//           background: linear-gradient(45deg, #06beb6, #48b1bf);
-//           color: white;
-//         }
-
-//         .btn.danger {
-//           background: linear-gradient(to right, #ff416c, #ff4b2b);
-//           color: white;
-//         }
-
-//         .btn:hover {
-//           transform: scale(1.05);
-//           opacity: 0.9;
-//         }
-
-//         .prompt-section {
-//           margin-top: 50px;
-//           padding: 20px;
-//           background: rgba(255,255,255,0.06);
-//           border-radius: 14px;
-//           box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-//         }
-
-//         .prompt-section h3 {
-//           margin-bottom: 18px;
-//           color: #fff;
-//         }
-
-//         .prompt-section ul {
-//           list-style: none;
-//           padding-left: 0;
-//         }
-
-//         .prompt-section li {
-//           background: rgba(0, 0, 0, 0.2);
-//           margin-bottom: 10px;
-//           padding: 10px;
-//           border-left: 4px solid #0072ff;
-//           border-radius: 6px;
-//           font-family: monospace;
-//           font-size: 0.95rem;
-//           color: #e0f7fa;
-//         }
-
-//         @keyframes fadeIn {
-//           from { opacity: 0; transform: translateY(15px); }
-//           to { opacity: 1; transform: translateY(0); }
-//         }
-
-//         @media (max-width: 768px) {
-//           .admin-header {
-//             flex-direction: column;
-//             gap: 16px;
-//           }
-
-//           .user-card {
-//             flex-direction: column;
-//             align-items: flex-start;
-//           }
-
-//           .btn-group {
-//             width: 100%;
-//             justify-content: flex-start;
-//           }
-
-//           .btn {
-//             width: 100%;
-//           }
-//         }
-//       `}</style>
-//     </div>
-//     // <div className="admin-container">
-//     //   <h2 className="admin-title">🛠️ Admin Dashboard</h2>
-
-//     //   <div className="user-list">
-//     //     {users.map((u) => (
-//     //       <div key={u._id} className="user-card">
-//     //         <div className="user-info">
-//     //           <p><strong>📧 Email:</strong> {u.email}</p>
-//     //           <p><strong>🗣️ Native Lang:</strong> {u.nativeLang}</p>
-//     //         </div>
-//     //         <div className="btn-group">
-//     //           <button onClick={() => delUser(u._id)} className="btn danger">Delete</button>
-//     //           <button onClick={() => viewPrompts(u._id)} className="btn view">View Prompts</button>
-//     //         </div>
-//     //       </div>
-//     //     ))}
-//     //   </div>
-
-//     //   {prompts.length > 0 && (
-//     //     <div className="prompt-section">
-//     //       <h3>📜 Prompt History</h3>
-//     //       <ul>
-//     //         {prompts.map((p) => (
-//     //           <li key={p._id}>
-//     //             <code>{p.inputText}</code> <b>→</b> <code>{p.translatedText}</code>
-//     //           </li>
-//     //         ))}
-//     //       </ul>
-//     //     </div>
-//     //   )}
-
-//     //   <style>{`
-//     //     .admin-container {
-//     //       max-width: 960px;
-//     //       margin: 60px auto;
-//     //       padding: 40px;
-//     //       border-radius: 20px;
-//     //       background: rgba(30, 30, 40, 0.85);
-//     //       backdrop-filter: blur(12px);
-//     //       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-//     //       color: #eee;
-//     //       animation: fadeIn 0.6s ease;
-//     //     }
-
-//     //     .admin-title {
-//     //       text-align: center;
-//     //       font-size: 2.8rem;
-//     //       background: linear-gradient(to right, #00c6ff, #0072ff);
-//     //       -webkit-background-clip: text;
-//     //       -webkit-text-fill-color: transparent;
-//     //       margin-bottom: 40px;
-//     //     }
-
-//     //     .user-list {
-//     //       display: flex;
-//     //       flex-direction: column;
-//     //       gap: 20px;
-//     //     }
-
-//     //     .user-card {
-//     //       background: rgba(255,255,255,0.05);
-//     //       padding: 20px 25px;
-//     //       border-radius: 12px;
-//     //       display: flex;
-//     //       justify-content: space-between;
-//     //       align-items: center;
-//     //       box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-//     //       transition: transform 0.3s ease;
-//     //     }
-
-//     //     .user-card:hover {
-//     //       transform: translateY(-4px);
-//     //     }
-
-//     //     .user-info p {
-//     //       margin: 6px 0;
-//     //       font-size: 1rem;
-//     //     }
-
-//     //     .btn-group {
-//     //       display: flex;
-//     //       gap: 12px;
-//     //     }
-
-//     //     .btn {
-//     //       padding: 10px 18px;
-//     //       font-weight: bold;
-//     //       border: none;
-//     //       border-radius: 8px;
-//     //       cursor: pointer;
-//     //       transition: transform 0.2s ease;
-//     //     }
-
-//     //     .btn.view {
-//     //       background: linear-gradient(45deg, #06beb6, #48b1bf);
-//     //       color: white;
-//     //     }
-
-//     //     .btn.danger {
-//     //       background: linear-gradient(to right, #ff416c, #ff4b2b);
-//     //       color: white;
-//     //     }
-
-//     //     .btn:hover {
-//     //       transform: scale(1.05);
-//     //       opacity: 0.9;
-//     //     }
-
-//     //     .prompt-section {
-//     //       margin-top: 50px;
-//     //       padding: 20px;
-//     //       background: rgba(255,255,255,0.06);
-//     //       border-radius: 14px;
-//     //       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-//     //     }
-
-//     //     .prompt-section h3 {
-//     //       margin-bottom: 18px;
-//     //       color: #fff;
-//     //     }
-
-//     //     .prompt-section ul {
-//     //       list-style: none;
-//     //       padding-left: 0;
-//     //     }
-
-//     //     .prompt-section li {
-//     //       background: rgba(0, 0, 0, 0.2);
-//     //       margin-bottom: 10px;
-//     //       padding: 10px;
-//     //       border-left: 4px solid #0072ff;
-//     //       border-radius: 6px;
-//     //       font-family: monospace;
-//     //       font-size: 0.95rem;
-//     //       color: #e0f7fa;
-//     //     }
-
-//     //     @keyframes fadeIn {
-//     //       from { opacity: 0; transform: translateY(15px); }
-//     //       to { opacity: 1; transform: translateY(0); }
-//     //     }
-
-//     //     @media (max-width: 768px) {
-//     //       .user-card {
-//     //         flex-direction: column;
-//     //         align-items: flex-start;
-//     //         gap: 12px;
-//     //       }
-
-//     //       .btn-group {
-//     //         width: 100%;
-//     //         justify-content: flex-start;
-//     //       }
-
-//     //       .btn {
-//     //         width: 100%;
-//     //       }
-//     //     }
-//     //   `}</style>
-//     // </div>
-//   );
-// }
+export default AdminDashboard;

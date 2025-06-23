@@ -1,207 +1,46 @@
-/* App.css */
+:root {
+  --main-bg: radial-gradient(circle at 30% 30%, #0f0c29, #302b63, #24243e);
+  --accent: #ec9aec;
+  --glow: #ec9aec;
+  --font-main: 'Poppins', sans-serif;
+  --text-glow: 0 0 6px #fff, 0 0 14px var(--glow), 0 0 22px var(--glow);
+  --box-glow: 0 0 20px var(--glow);
+  --glass: rgba(255, 255, 255, 0.06);
+}
 
 body {
   margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #1f1c2c, #928dab);
+  font-family: var(--font-main);
+  background: var(--main-bg);
+  color: #fff;
   min-height: 100vh;
   overflow-x: hidden;
+  background-attachment: fixed;
+  animation: portalFade 30s infinite alternate;
+  transition: background 0.5s ease;
 }
 
-/* Container */
-.translate-container {
-  max-width: 600px;
-  margin: 60px auto;
-  padding: 30px;
-  background: rgba(30, 30, 40, 0.75);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  color: #eee;
-  animation: fadeIn 0.6s ease;
-  backdrop-filter: blur(12px);
+@keyframes portalFade {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 
-/* Top Bar (Centered Title & Logout) */
-.top-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 25px;
-  animation: dropFade 0.8s ease;
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(var(--glow) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.05;
+  pointer-events: none;
+  animation: twinkle 5s linear infinite;
+  z-index: 0;
 }
 
-.top-bar h2 {
-  margin: 0;
-  font-size: 2rem;
-  background: linear-gradient(to right, #6a11cb, #2575fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
-  text-align: center;
-  animation: pulseGlow 1.8s ease-in-out infinite;
-}
-
-.logout-btn {
-  background: linear-gradient(45deg, #ff416c, #ff4b2b);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 100, 100, 0.3);
-  transition: transform 0.3s ease;
-}
-.logout-btn:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-/* Translate Box */
-.translate-box {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-/* Inputs */
-textarea,
-input,
-select {
-  padding: 12px;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  outline: none;
-  transition: background 0.3s ease;
-  resize: none;
-}
-
-textarea::placeholder,
-input::placeholder {
-  color: #bbb;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-select option {
-  color: #000;
-}
-
-/* Buttons */
-.speak-btn,
-.translate-btn {
-  padding: 12px;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  background: linear-gradient(to right, #00c6ff, #0072ff);
-  box-shadow: 0 6px 18px rgba(0, 128, 255, 0.3);
-  transition: transform 0.2s ease;
-}
-
-.speak-btn:hover,
-.translate-btn:hover {
-  transform: scale(1.05);
-  opacity: 0.95;
-}
-
-/* Output Text */
-.result {
-  margin-top: 10px;
-  font-size: 1.1rem;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 14px;
-  border-radius: 10px;
-  border-left: 5px solid #00c6ff;
-  animation: fadeInResult 0.4s ease;
-  word-break: break-word;
-}
-
-/* Speaking Indicator */
-.speaking {
-  color: #0f0;
-  font-weight: bold;
-}
-
-/* History Section */
-.history-section {
-  margin-top: 30px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 20px;
-  border-radius: 10px;
-  color: #eee;
-}
-
-.history-item {
-  margin-bottom: 15px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.07);
-  border-radius: 8px;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInResult {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes dropFade {
-  from {
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    text-shadow: 0 0 8px #6a11cb, 0 0 12px #2575fc;
-  }
-  50% {
-    text-shadow: 0 0 16px #6a11cb, 0 0 20px #2575fc;
-  }
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .translate-container {
-    padding: 20px;
-    margin: 30px 16px;
-  }
-
-  .top-bar h2 {
-    font-size: 1.6rem;
-  }
+@keyframes twinkle {
+  from { background-position: 0 0; }
+  to { background-position: 100% 100%; }
 }

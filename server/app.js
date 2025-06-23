@@ -1,93 +1,124 @@
-// server.js
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const bodyParser = require("body-parser");
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const axios = require('axios');
+const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-const PORT = 5000;
-const MONGO_URL = "mongodb+srv://arunsamy2004:1234567890@translator.cgtxl2f.mongodb.net/?retryWrites=true&w=majority&appName=translator";
-
-mongoose.connect(MONGO_URL)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log("DB Error:", err));
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const userSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-  nativeLang: String
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  nativeLanguage: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+const promptSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userInput: { type: String, required: true },
+  aiResponse: { type: String, required: true },
+  inputLanguage: { type: String, required: true },
+  outputLanguage: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
-const historySchema = new mongoose.Schema({
-  userId: String,
-  inputText: String,
-  translatedText: String,
-  targetLang: String,
-  date: { type: Date, default: Date.now }
-});
+const User = mongoose.model('User', userSchema);
+const Prompt = mongoose.model('Prompt', promptSchema);
 
-const User = mongoose.model("User", userSchema);
-const History = mongoose.model("History", historySchema);
+const ADMIN_EMAIL = 'admin@gmail.com';
+const ADMIN_PASSWORD = 'admin';
 
-// ---------------------- Auth --------------------------
-app.post("/signup", async (req, res) => {
-  const { email, password, nativeLang } = req.body;
-  const userExist = await User.findOne({ email });
-  if (userExist) return res.status(400).json({ message: "User already exists" });
+const isAdmin = (req, res, next) => {
+  const email = req.query.email || req.body.email;
+  const password = req.query.password || req.body.password;
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) return next();
+  res.status(403).json({ message: 'Forbidden: Admin only' });
+};
 
-  const user = await User.create({ email, password, nativeLang });
-  res.json(user);
-});
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  // Admin login
-  if (email === "admin@gmail.com" && password === "admin12345") {
-    return res.json({ role: "admin", email });
+app.post('/api/signup', async (req, res) => {
+  try {
+    const { email, password, nativeLanguage } = req.body;
+    const hashed = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashed, nativeLanguage });
+    await user.save();
+    res.status(201).json({ message: 'User created' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
-
-  const user = await User.findOne({ email, password });
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
-  res.json({ role: "user", user });
 });
 
-// -------------------- Translation History ---------------------
-app.post("/translate", async (req, res) => {
-  const { userId, inputText, translatedText, targetLang } = req.body;
-  await History.create({ userId, inputText, translatedText, targetLang });
-  res.json({ message: "Saved" });
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) return res.json({ isAdmin: true, email });
+  const user = await User.findOne({ email });
+  if (!user || !(await bcrypt.compare(password, user.password))) return res.status(401).json({ message: 'Invalid credentials' });
+  res.json({ isAdmin: false, _id: user._id, email: user.email, nativeLanguage: user.nativeLanguage });
 });
 
-app.get("/history/:userId", async (req, res) => {
-  const history = await History.find({ userId: req.params.userId });
-  res.json(history);
+app.post('/api/translate', async (req, res) => {
+  try {
+    const { userId, text, inputLanguage = 'en', outputLanguage } = req.body;
+    if (!text) return res.status(400).json({ error: 'Text required' });
+
+    const response = await axios.post(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: `Translate this text from ${inputLanguage} to ${outputLanguage}: "${text}"`
+              }
+            ]
+          }
+        ]
+      },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
+    const translatedText = response.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Translation failed';
+    await new Prompt({ userId, userInput: text, aiResponse: translatedText, inputLanguage, outputLanguage }).save();
+    res.json({ translatedText });
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ error: 'Translation failed', details: err.response?.data?.error?.message || err.message });
+  }
 });
 
-app.delete("/history/:id", async (req, res) => {
-  await History.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
-});
 
-// ------------------- Admin Controls -----------------------
-app.get("/admin/users", async (req, res) => {
-  const users = await User.find({});
-  res.json(users);
-});
-
-app.delete("/admin/users/:id", async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  await History.deleteMany({ userId: req.params.id });
-  res.json({ message: "User and history deleted" });
-});
-
-app.get("/admin/prompts/:userId", async (req, res) => {
-  const prompts = await History.find({ userId: req.params.userId });
+app.get('/api/prompts/:userId', async (req, res) => {
+  const prompts = await Prompt.find({ userId: req.params.userId }).sort({ createdAt: -1 });
   res.json(prompts);
 });
 
-app.listen(PORT, () => console.log("Server running on PORT", PORT));
+app.delete('/api/prompts/:userId/:id', async (req, res) => {
+  await Prompt.deleteOne({ _id: req.params.id, userId: req.params.userId });
+  res.json({ message: 'Prompt deleted' });
+});
+
+app.get('/api/admin/users', isAdmin, async (req, res) => {
+  const users = await User.find({ email: { $ne: ADMIN_EMAIL } });
+  res.json(users);
+});
+
+app.delete('/api/admin/users/:id', isAdmin, async (req, res) => {
+  await User.findByIdAndDelete(req.params.id);
+  await Prompt.deleteMany({ userId: req.params.id });
+  res.json({ message: 'User deleted' });
+});
+
+app.get('/api/admin/prompts', isAdmin, async (req, res) => {
+  const prompts = await Prompt.find().populate('userId', 'email').sort({ createdAt: -1 });
+  res.json(prompts);
+});
+
+app.listen(process.env.PORT || 5000, () => console.log('Server started'));
