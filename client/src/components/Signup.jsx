@@ -48,6 +48,7 @@ const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/login`, {
         password
       });
       setUser(res.data);
+      navigate('/'); // ✅ Add this line so user goes straight to dashboard
     } catch (err) {
       setError(err.response?.data?.message || 'Signup failed');
     }
