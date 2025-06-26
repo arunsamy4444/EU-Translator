@@ -10,7 +10,7 @@ const Login = ({ setUser, setIsSignup }) => {
 
 const handleLogin = async () => {
   try {
-    const res = await axios.post('http://localhost:5000/api/login', { email, password });
+   const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/login`, { email, password });
 
     setUser(res.data); // 🔥 Always set user in state
     localStorage.setItem('user', JSON.stringify(res.data)); // 🔥 Always store it
