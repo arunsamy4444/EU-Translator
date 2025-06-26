@@ -6,7 +6,11 @@ const axios = require('axios');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://eu-translator-zdtn.vercel.app',
+  credentials: true,
+}));
+
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URL)
