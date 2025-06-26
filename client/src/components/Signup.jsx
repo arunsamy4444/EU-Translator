@@ -36,12 +36,13 @@ const Signup = ({ setUser, setIsSignup }) => {
 
   const handleSignup = async () => {
     try {
-      await axios.post('http://localhost:5000/api/signup', {
+await axios.post(`${process.env.REACT_APP_BASE_URL}/api/signup`, {
         email,
         password,
         nativeLanguage
       });
-      const res = await axios.post('http://localhost:5000/api/login', {
+const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/login`, {
+
         email,
         password
       });
