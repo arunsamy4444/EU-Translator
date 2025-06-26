@@ -189,10 +189,10 @@ const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/login`, {
           ))}
         </select>
         <button onClick={handleSignup}>Signup</button>
-        <p>
-          Already have an account?
-          <button onClick={() => setIsSignup(false)}>Log in</button>
-        </p>
+      <p>
+  Already have an account?
+  <button onClick={() => navigate('/')}>Log in</button>
+</p>
       </div>
     </div>
   );
@@ -201,69 +201,3 @@ const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/login`, {
 export default Signup;
 
 
-
-// // components/Signup.js
-// import React, { useState } from 'react';
-// import axios from 'axios';
-
-// const languages = [
-//   { code: 'en', name: 'English' }, // ✅ ADD THIS
-//   { code: 'es', name: 'Spanish' },
-//   { code: 'de', name: 'German' },
-//   { code: 'pl', name: 'Polish' },
-//   { code: 'ta', name: 'Tamil' },
-//   { code: 'fr', name: 'French' },
-//   { code: 'it', name: 'Italian' },
-//   { code: 'pt', name: 'Portuguese' },
-//   { code: 'nl', name: 'Dutch' },
-//   { code: 'sv', name: 'Swedish' },
-//   { code: 'fi', name: 'Finnish' },
-//   { code: 'da', name: 'Danish' },
-//   { code: 'no', name: 'Norwegian' },
-//   { code: 'hu', name: 'Hungarian' },
-//   { code: 'cs', name: 'Czech' },
-//   { code: 'ro', name: 'Romanian' },
-//   { code: 'el', name: 'Greek' },
-//   { code: 'bg', name: 'Bulgarian' },
-//   { code: 'hr', name: 'Croatian' },
-//   { code: 'sk', name: 'Slovak' },
-//   { code: 'sl', name: 'Slovenian' },
-//   { code: 'lt', name: 'Lithuanian' },
-//   { code: 'lv', name: 'Latvian' },
-//   { code: 'et', name: 'Estonian' }
-// ];
-
-// const Signup = ({ setUser, setIsSignup }) => {
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const [nativeLanguage, setNativeLanguage] = useState('ta');
-//   const [error, setError] = useState('');
-
-//   const handleSignup = async () => {
-//     try {
-//       await axios.post('http://localhost:5000/api/signup', { email, password, nativeLanguage });
-//       const res = await axios.post('http://localhost:5000/api/login', { email, password });
-//       setUser(res.data);
-//     } catch (err) {
-//       setError(err.response?.data?.message || 'Signup failed');
-//     }
-//   };
-
-//   return (
-//     <div >
-//       <h2>Signup</h2>
-//       {error && <p style={{ color: 'red' }}>{error}</p>}
-//       <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-//       <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-//       <select value={nativeLanguage} onChange={e => setNativeLanguage(e.target.value)}>
-//         {languages.map(lang => (
-//           <option key={lang.code} value={lang.code}>{lang.name}</option>
-//         ))}
-//       </select>
-//       <button onClick={handleSignup}>Signup</button>
-//       <p>Already have an account? <button onClick={() => setIsSignup(false)}>Log in</button></p>
-//     </div>
-//   );
-// };
-
-// export default Signup;
