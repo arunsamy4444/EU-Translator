@@ -73,7 +73,8 @@ const TranslatorBox = ({ user }) => {
   // 🌍 Translate and Speak
   const handleTranslate = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/translate", {
+const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/translate`, {
+
         userId: user._id,
         text: inputText,
         inputLanguage: user.nativeLanguage || "en",
