@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const languages = [
   { code: 'en', name: 'English' },
@@ -33,6 +34,7 @@ const Signup = ({ setUser, setIsSignup }) => {
   const [password, setPassword] = useState('');
   const [nativeLanguage, setNativeLanguage] = useState('ta');
   const [error, setError] = useState('');
+    const navigate = useNavigate(); // ✅ this line
 
   const handleSignup = async () => {
     try {
@@ -42,7 +44,6 @@ await axios.post(`${process.env.REACT_APP_BASE_URL}/api/signup`, {
         nativeLanguage
       });
 const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/login`, {
-
         email,
         password
       });
