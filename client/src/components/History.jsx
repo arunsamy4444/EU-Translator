@@ -7,7 +7,7 @@ const History = ({ userId }) => {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/prompts/${userId}`);
+ const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/prompts/${userId}`);
       setPrompts(res.data.reverse()); // latest first
     } catch (err) {
       console.error('Failed to fetch history', err);
@@ -17,7 +17,7 @@ const History = ({ userId }) => {
   };
 
   const deletePrompt = async (id) => {
-    await axios.delete(`http://localhost:5000/api/prompts/${userId}/${id}`);
+await axios.delete(`${process.env.REACT_APP_BASE_URL}/api/prompts/${userId}/${id}`);
     fetchHistory();
   };
 
