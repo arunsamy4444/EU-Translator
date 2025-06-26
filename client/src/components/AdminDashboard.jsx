@@ -9,7 +9,7 @@ const AdminDashboard = ({ user, onLogout }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/admin/users', {
+        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/admin/users`, {
           params: { email: user.email, password: 'admin' },
         });
         setUsers(res.data);
@@ -22,7 +22,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const handleUserPrompts = async (userObj) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/prompts/${userObj._id}`);
+   const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/prompts/${userObj._id}`);
       setSelectedUser(userObj);
       setPrompts(res.data);
     } catch (err) {
@@ -32,9 +32,9 @@ const AdminDashboard = ({ user, onLogout }) => {
 
   const deleteUser = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
-        params: { email: user.email, password: 'admin' },
-      });
+await axios.delete(`${process.env.REACT_APP_BASE_URL}/api/admin/users/${id}`, {
+  params: { email: user.email, password: 'admin' }
+});
       setUsers(prev => prev.filter(u => u._id !== id));
       if (selectedUser && selectedUser._id === id) {
         setSelectedUser(null);
