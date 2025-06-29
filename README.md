@@ -1,4 +1,4 @@
-# 🌍 Multilingual Voice Translator App
+# 🌍EU Translator App
 
 A full-stack translator app that converts voice to text, translates it using the Gemini API, and plays back the translated voice. Includes user history tracking and an admin dashboard.
 
