@@ -65,11 +65,27 @@ app.post('/api/login', async (req, res) => {
   res.json({ isAdmin: false, _id: user._id, email: user.email, nativeLanguage: user.nativeLanguage });
 });
 
+
 app.post('/api/translate', async (req, res) => {
   try {
     const { userId, text, inputLanguage = 'en', outputLanguage } = req.body;
     if (!text) return res.status(400).json({ error: 'Text required' });
 
+    // 📅 Get start of today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 🧾 Count all translations today (global)
+    const totalToday = await Prompt.countDocuments({
+      createdAt: { $gte: today }
+    });
+
+    // 🚫 If 10 or more, block all users
+    if (totalToday >= 10) {
+      return res.status(429).json({ error: 'Daily translation limit (10) for all users reached. Try again tomorrow.' });
+    }
+
+    // ✅ Proceed with translation
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -90,13 +106,57 @@ app.post('/api/translate', async (req, res) => {
     );
 
     const translatedText = response.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Translation failed';
-    await new Prompt({ userId, userInput: text, aiResponse: translatedText, inputLanguage, outputLanguage }).save();
-    res.json({ translatedText });
+
+    // 💾 Save the translation
+    await new Prompt({
+      userId,
+      userInput: text,
+      aiResponse: translatedText,
+      inputLanguage,
+      outputLanguage
+    }).save();
+
+    res.json({ translatedText, remaining: 10 - (totalToday + 1) });
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: 'Translation failed', details: err.response?.data?.error?.message || err.message });
+    res.status(500).json({
+      error: 'Translation failed',
+      details: err.response?.data?.error?.message || err.message
+    });
   }
 });
+// app.post('/api/translate', async (req, res) => {
+//   try {
+//     const { userId, text, inputLanguage = 'en', outputLanguage } = req.body;
+//     if (!text) return res.status(400).json({ error: 'Text required' });
+
+//     const response = await axios.post(
+//       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+//       {
+//         contents: [
+//           {
+//             role: "user",
+//             parts: [
+//               {
+//                 text: `Translate this text from ${inputLanguage} to ${outputLanguage}: "${text}"`
+//               }
+//             ]
+//           }
+//         ]
+//       },
+//       {
+//         headers: { 'Content-Type': 'application/json' }
+//       }
+//     );
+
+//     const translatedText = response.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Translation failed';
+//     await new Prompt({ userId, userInput: text, aiResponse: translatedText, inputLanguage, outputLanguage }).save();
+//     res.json({ translatedText });
+//   } catch (err) {
+//     console.error(err.response?.data || err.message);
+//     res.status(500).json({ error: 'Translation failed', details: err.response?.data?.error?.message || err.message });
+//   }
+// });
 
 
 app.get('/api/prompts/:userId', async (req, res) => {
