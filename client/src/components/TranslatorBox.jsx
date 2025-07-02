@@ -2,6 +2,9 @@ import React, { useState, useRef } from "react";
 import axios from "axios";
 import History from "./History";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const languages = [
   { code: "en", name: "English" },
@@ -73,8 +76,7 @@ const TranslatorBox = ({ user }) => {
   // 🌍 Translate and Speak
   const handleTranslate = async () => {
     try {
-const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/translate`, {
-
+      const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/translate`, {
         userId: user._id,
         text: inputText,
         inputLanguage: user.nativeLanguage || "en",
@@ -87,21 +89,57 @@ const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/translate`, 
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedOutputLang;
 
-      // 🎯 After voice playback ends → clear input
       utterance.onend = () => {
-        setInputText("");
+        setInputText(""); // Clear input after speaking
       };
 
       utteranceRef.current = utterance;
       speechSynthesis.speak(utterance);
+
+      toast.success("Translation successful!");
     } catch (err) {
-      setOutputText("Translation failed");
-      console.error(err);
+    const isLimitReached = err.response?.data?.error === "Daily API limit exceeded";
+    const message = isLimitReached
+      ? "🚫 Daily API limit (10) reached."
+      : "❌ Translation failed. Api limit reached(10)";
+
+    toast.error(message);
+    setOutputText(message);
     }
   };
 
+//   const handleTranslate = async () => {
+//     try {
+// const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/translate`, {
+
+//         userId: user._id,
+//         text: inputText,
+//         inputLanguage: user.nativeLanguage || "en",
+//         outputLanguage: selectedOutputLang,
+//       });
+
+//       const translatedText = res.data.translatedText;
+//       setOutputText(translatedText);
+
+//       const utterance = new SpeechSynthesisUtterance(translatedText);
+//       utterance.lang = selectedOutputLang;
+
+//       // 🎯 After voice playback ends → clear input
+//       utterance.onend = () => {
+//         setInputText("");
+//       };
+
+//       utteranceRef.current = utterance;
+//       speechSynthesis.speak(utterance);
+//     } catch (err) {
+//       setOutputText("Translation failed");
+//       console.error(err);
+//     }
+//   };
+
   return (
     <div className="translator-wrapper">
+        <ToastContainer position="top-right" autoClose={3000} />
       <style>{`
         .translator-wrapper {
           min-height: 100vh;
@@ -272,6 +310,7 @@ const res = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/translate`, 
 };
 
 export default TranslatorBox;
+
 
 
 // import React, { useState, useRef } from "react";
