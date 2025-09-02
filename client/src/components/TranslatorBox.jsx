@@ -4,7 +4,7 @@ import History from "./History";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import '../styles/TranslatorBox.css'
+import '../TranslatorBox.css'
 
 const languages = [
   { code: "en", name: "English" },
