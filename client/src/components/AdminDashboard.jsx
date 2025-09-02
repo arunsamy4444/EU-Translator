@@ -1,206 +1,124 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import '../styles/AdminDashboard.css'
+
+const BASE_URL =  "http://localhost:10000"||process.env.REACT_APP_BASE_URL ;
 
 const AdminDashboard = ({ user, onLogout }) => {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [prompts, setPrompts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/admin/users`, {
-          params: { email: user.email, password: 'admin' },
-        });
-        setUsers(res.data);
-      } catch (err) {
-        console.error('Failed to fetch users:', err);
-      }
-    };
-    fetchUsers();
-  }, [user]);
+  const adminHeaders = {
+    'x-admin-email': user.email,
+    'x-admin-password': 'admin',
+  };
 
-  const handleUserPrompts = async (userObj) => {
+  // Fetch all users (admin)
+  const fetchUsers = async () => {
     try {
-   const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/prompts/${userObj._id}`);
-      setSelectedUser(userObj);
-      setPrompts(res.data);
+      const res = await axios.get(`${BASE_URL}/api/admin/users`, { headers: adminHeaders });
+      setUsers(res.data);
     } catch (err) {
-      console.error('Failed to fetch prompts:', err);
+      console.error('Fetch users failed:', err.response?.data || err.message);
     }
   };
 
+  // Delete a user (admin)
   const deleteUser = async (id) => {
     try {
-await axios.delete(`${process.env.REACT_APP_BASE_URL}/api/admin/users/${id}`, {
-  params: { email: user.email, password: 'admin' }
-});
+      await axios.delete(`${BASE_URL}/api/admin/users/${id}`, { headers: adminHeaders });
       setUsers(prev => prev.filter(u => u._id !== id));
+
       if (selectedUser && selectedUser._id === id) {
         setSelectedUser(null);
         setPrompts([]);
       }
     } catch (err) {
-      console.error('Failed to delete user:', err);
+      console.error('Delete user failed:', err.response?.data || err.message);
     }
   };
 
+  // Fetch prompts of a user
+const fetchPrompts = async (userId) => {
+  try {
+    const res = await axios.get(`${BASE_URL}/api/admin/prompts`, { headers: adminHeaders });
+    const userPrompts = res.data.filter(
+      p => p.userId && p.userId._id.toString() === userId.toString()
+    );
+    setPrompts(userPrompts);
+
+    const foundUser = users.find(u => u._id.toString() === userId.toString());
+    setSelectedUser(foundUser || { email: 'Unknown', _id: userId });
+  } catch (err) {
+    console.error('Fetch prompts failed:', err.response?.data || err.message);
+  }
+};
+
+
+
+  // Delete a prompt (admin)
+  const deletePrompt = async (promptId) => {
+    try {
+      if (!selectedUser) return;
+      await axios.delete(`${BASE_URL}/api/prompts/${selectedUser._id}/${promptId}`);
+      setPrompts(prev => prev.filter(p => p._id !== promptId));
+    } catch (err) {
+      console.error('Delete prompt failed:', err.response?.data || err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+  console.log('Users loaded:', users);
+}, [users]);
 
   return (
-    <div className="signup-wrapper">
-      <style>{`
-        .signup-wrapper {
-          min-height: 100vh;
-          padding: 2rem;
-          background: radial-gradient(circle at 30% 30%, #0f0c29, #302b63, #24243e);
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-family: 'Poppins', sans-serif;
-        }
-        .signup-card {
-          background: rgba(255, 255, 255, 0.06);
-          backdrop-filter: blur(15px);
-          padding: 2rem;
-          border-radius: 20px;
-          max-width: 900px;
-          width: 100%;
-          color: #fff;
-          box-shadow: 0 0 25px #ec9aec;
-          animation: fadeInCard 0.8s ease;
-        }
-        h2 {
-          text-align: center;
-          color: #ec9aec;
-          margin-bottom: 1rem;
-          text-shadow: 0 0 10px #fff, 0 0 20px #ec9aec;
-        }
-        h3 {
-          margin-top: 1.5rem;
-          color: #ffd6ff;
-        }
-        .box-card, .history-item {
-          background: rgba(255, 255, 255, 0.08);
-          padding: 1rem;
-          border-radius: 14px;
-          margin-bottom: 1rem;
-          box-shadow: 0 0 10px #ec9aec40;
-          transition: transform 0.2s ease;
-        }
-        .box-card:hover {
-          transform: scale(1.02);
-        }
-        .box-card button, .logout-button {
-          margin-left: 0.6rem;
-          padding: 0.5rem 1rem;
-          background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-          border: none;
-          border-radius: 12px;
-          color: #fff;
-          cursor: pointer;
-          font-weight: bold;
-          transition: 0.3s;
-        }
-        .logout-button {
-          display: block;
-          margin: 1rem auto;
-          background: linear-gradient(135deg, #ff7675, #e84393);
-        }
-        .box-card button:hover, .logout-button:hover {
-          box-shadow: 0 0 12px #ec9aec;
-        }
-        .history-item p {
-          margin: 0.3rem 0;
-        }
-        @keyframes fadeInCard {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <div className="admin-dashboard">
+      <h2>🛡️ Admin Dashboard</h2>
+      <button className="btn-logout" onClick={onLogout}>Logout</button>
 
-      <div className="signup-card">
-        <h2>🛡️ Admin Dashboard</h2>
-        <button className="logout-button" onClick={onLogout}>Logout</button>
-
-        {!selectedUser ? (
-          <>
-            <h3>👤 Total Users: {users.length}</h3>
+      {!selectedUser ? (
+        <>
+          <h3>👤 Total Users: {users.length}</h3>
+          <div className="user-list">
             {users.map(u => (
-              <div key={u._id} className="box-card">
+              <div key={u._id} className="user-item">
                 <strong>{u.email}</strong>
-                <button onClick={() => handleUserPrompts(u)}>📂 View Prompts</button>
-                <button onClick={() => deleteUser(u._id)}>🗑️ Delete</button>
+                <div className="user-actions">
+                  <button className="btn-view" onClick={() => fetchPrompts(u._id)}>📂 View Prompts</button>
+                  <button className="btn-delete" onClick={() => deleteUser(u._id)}>🗑️ Delete User</button>
+                </div>
               </div>
             ))}
-          </>
-        ) : (
-          <>
+          </div>
+        </>
+      ) : (
+        <div className="prompts-view">
+          <div className="prompts-header">
             <h3>📂 Prompts by: {selectedUser.email}</h3>
-            <button className="logout-button" onClick={() => {
-              setSelectedUser(null);
-              setPrompts([]);
-            }}>🔙 Back to Users</button>
-            {prompts.length === 0 ? (
-              <p style={{ opacity: 0.6, marginTop: '1rem' }}>No prompts found for this user.</p>
-            ) : (
-              prompts.map(p => (
-                <div key={p._id} className="history-item">
-                  <p><strong>{p.userInput}</strong> → <em>{p.aiResponse}</em></p>
-                  <p style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                    {p.inputLanguage} ➝ {p.outputLanguage} | {new Date(p.createdAt).toLocaleString()}
-                  </p>
+            <button className="btn-back" onClick={() => { setSelectedUser(null); setPrompts([]); }}>🔙 Back to Users</button>
+          </div>
+          {prompts.length === 0 ? (
+            <p className="no-prompts">No prompts found.</p>
+          ) : (
+            prompts.map(p => (
+              <div key={p._id} className="prompt-item">
+                <p><strong>Input:</strong> {p.userInput}</p>
+                <p><strong>Response:</strong> {p.aiResponse}</p>
+                <div className="prompt-actions">
+                  <button className="btn-delete" onClick={() => deletePrompt(p._id)}>🗑️ Delete Prompt</button>
                 </div>
-              ))
-            )}
-          </>
-        )}
-      </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
-  // return (
-  //   <div style={{ padding: '2rem', fontFamily: 'sans-serif', color: '#fff' }}>
-  //     <h2 style={{ color: '#ff00ff', textShadow: '0 0 10px #ff00ff' }}>🛡️ Admin Dashboard</h2>
-  //     <button onClick={onLogout} className="logout-button">Logout</button>
-
-  //     {!selectedUser ? (
-  //       <div style={{ marginTop: '2rem' }}>
-  //         <h3>👤 Total Users: {users.length}</h3>
-  //         {users.map(u => (
-  //           <div key={u._id} className="box-card">
-  //             <strong>{u.email}</strong>
-  //             <button onClick={() => handleUserPrompts(u)} style={{ marginLeft: '1rem' }}>
-  //               📂 View Prompts
-  //             </button>
-  //             <button onClick={() => deleteUser(u._id)} style={{ marginLeft: '1rem' }}>
-  //               🗑️ Delete
-  //             </button>
-  //           </div>
-  //         ))}
-  //       </div>
-  //     ) : (
-  //       <div style={{ marginTop: '2rem' }}>
-  //         <h3>📂 Prompts by: {selectedUser.email}</h3>
-  //         <button onClick={() => {
-  //           setSelectedUser(null);
-  //           setPrompts([]);
-  //         }}>🔙 Back to Users</button>
-
-  //         {prompts.length === 0 ? (
-  //           <p style={{ marginTop: '1rem' }}>No prompts found for this user.</p>
-  //         ) : (
-  //           prompts.map(p => (
-  //             <div key={p._id} className="history-item">
-  //               <p><strong>{p.userInput}</strong> → <em>{p.aiResponse}</em></p>
-  //               <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-  //                 {p.inputLanguage} ➝ {p.outputLanguage} | {new Date(p.createdAt).toLocaleString()}
-  //               </p>
-  //             </div>
-  //           ))
-  //         )}
-  //       </div>
-  //     )}
-  //   </div>
-  // );
 };
 
 export default AdminDashboard;
