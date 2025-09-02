@@ -1,6 +1,6 @@
 import React from 'react';
 import History from './History';
-import '../styles/HistoryPage.css'
+import '../HistoryPage.css'
 const HistoryPage = ({ user }) => {
   if (!user) {
     return (
