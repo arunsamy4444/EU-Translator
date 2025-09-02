@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import TranslatorBox from './TranslatorBox';
-import '../styles/Dashboard.css'
+import '../Dashboard.css'
 
 const Dashboard = ({ user, onLogout }) => {
   const [outputLanguage, setOutputLanguage] = useState(user.nativeLanguage || 'en');
