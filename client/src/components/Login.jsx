@@ -10,7 +10,7 @@ const Login = ({ setUser }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const BASE_URL ='http://localhost:10000' || process.env.REACT_APP_BASE_URL ;
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:10000";
 
 const handleLogin = async () => {
   if (!email || !password) {
