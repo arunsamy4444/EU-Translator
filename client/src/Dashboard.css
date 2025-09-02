@@ -1,0 +1,211 @@
+/* Dashboard.css - Ghost Themed Dark Animated Blue Style */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-blue: #0a0e29;
+    --secondary-blue: #0c112d;
+    --accent-blue: #00a8ff;
+    --glow-blue: #0088ff;
+    --text-color: #e0e0e0;
+    --error-color: #ff3860;
+    --success-color: #23d160;
+}
+
+.dashboard-wrapper {
+    background: linear-gradient(135deg, #050722 0%, #0a1142 100%);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Ghost animation elements */
+.dashboard-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 168, 255, 0.15) 0%, rgba(0, 168, 255, 0) 70%);
+    top: 15%;
+    left: 10%;
+    animation: float 12s ease-in-out infinite;
+    z-index: 0;
+}
+
+.dashboard-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 136, 255, 0.1) 0%, rgba(0, 136, 255, 0) 70%);
+    bottom: 20%;
+    right: 10%;
+    animation: float 8s ease-in-out infinite reverse;
+    z-index: 0;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-20px) translateX(15px);
+    }
+    50% {
+        transform: translateY(10px) translateX(-15px);
+    }
+    75% {
+        transform: translateY(-10px) translateX(-10px);
+    }
+}
+
+.logout-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+    width: auto; /* Don't force full width */
+    min-width: 120px; /* Reasonable minimum width */
+}
+
+.logout-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.logout-button:active {
+    transform: translateY(0);
+}
+
+/* Ghost animation elements */
+.ghost {
+    position: absolute;
+    width: 30px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50% 50% 0 0;
+    animation: ghostFloat 8s ease-in-out infinite;
+    z-index: 0;
+}
+
+.ghost::before, .ghost::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    bottom: -8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ghost::before {
+    left: 5px;
+}
+
+.ghost::after {
+    right: 5px;
+}
+
+.ghost:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.ghost:nth-child(2) {
+    top: 60%;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+@keyframes ghostFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    25% {
+        transform: translateY(-15px) rotate(5deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    75% {
+        transform: translateY(15px) rotate(-5deg);
+        opacity: 0.3;
+    }
+}
+
+/* Responsive Design - FIXED LOGOUT BUTTON WIDTH */
+@media (max-width: 768px) {
+    .dashboard-wrapper {
+        padding: 15px;
+    }
+    
+    .logout-button {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin: 0 auto 20px auto; /* Center the button */
+        display: block;
+        width: 40%; /* 40% width on mobile */
+        min-width: 140px; /* Comfortable minimum width */
+    }
+    
+    .dashboard-wrapper::before,
+    .dashboard-wrapper::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-wrapper {
+        padding: 10px;
+    }
+    
+    .logout-button {
+        padding: 12px;
+        font-size: 14px;
+        width: 40%; /* 40% width on small mobile */
+        min-width: 120px;
+    }
+    
+    .ghost {
+        display: none;
+    }
+}
+
+/* Animation for the dashboard content */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dashboard-wrapper > *:not(.ghost) {
+    animation: fadeIn 0.8s ease-out;
+}

@@ -1,0 +1,323 @@
+/* History.css - Ghost Themed Dark Animated Blue Style */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-blue: #0a0e29;
+    --secondary-blue: #0c112d;
+    --accent-blue: #00a8ff;
+    --glow-blue: #0088ff;
+    --text-color: #e0e0e0;
+    --error-color: #ff3860;
+    --success-color: #23d160;
+}
+
+body {
+    background: linear-gradient(135deg, #050722 0%, #0a1142 100%);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+}
+
+.history-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ghost animation elements */
+.history-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 168, 255, 0.15) 0%, rgba(0, 168, 255, 0) 70%);
+    top: 15%;
+    left: 10%;
+    animation: float 12s ease-in-out infinite;
+    z-index: -1;
+}
+
+.history-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 136, 255, 0.1) 0%, rgba(0, 136, 255, 0) 70%);
+    bottom: 20%;
+    right: 10%;
+    animation: float 8s ease-in-out infinite reverse;
+    z-index: -1;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-20px) translateX(15px);
+    }
+    50% {
+        transform: translateY(10px) translateX(-15px);
+    }
+    75% {
+        transform: translateY(-10px) translateX(-10px);
+    }
+}
+
+.history-wrapper > p {
+    text-align: center;
+    color: var(--text-color);
+    font-size: 18px;
+    margin-top: 50px;
+    opacity: 0.8;
+}
+
+.history-item {
+    background: rgba(10, 14, 41, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px rgba(0, 136, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-out;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.3);
+    border-color: rgba(0, 168, 255, 0.4);
+}
+
+.history-item::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(0, 168, 255, 0.1),
+        rgba(0, 168, 255, 0.05),
+        transparent
+    );
+    transform: rotate(30deg);
+    z-index: -1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.history-item p {
+    color: var(--text-color);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.history-item p:first-child {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.history-item p:first-child strong {
+    color: var(--accent-blue);
+    text-shadow: 0 0 5px rgba(0, 136, 255, 0.3);
+}
+
+.history-item p:last-child {
+    font-size: 14px;
+    opacity: 0.8;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.history-item p:last-child strong {
+    color: #9b59b6;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(231, 76, 60, 0.3);
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.history-wrapper > p[style*="Loading"] {
+    animation: pulse 1.5s infinite;
+    color: var(--accent-blue) !important;
+    text-shadow: 0 0 8px rgba(0, 136, 255, 0.4);
+}
+
+/* Ghost animation elements inside the history */
+.ghost {
+    position: absolute;
+    width: 30px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50% 50% 0 0;
+    animation: ghostFloat 8s ease-in-out infinite;
+    z-index: -1;
+}
+
+.ghost::before, .ghost::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    bottom: -8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ghost::before {
+    left: 5px;
+}
+
+.ghost::after {
+    right: 5px;
+}
+
+.ghost:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.ghost:nth-child(2) {
+    top: 60%;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+@keyframes ghostFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    25% {
+        transform: translateY(-15px) rotate(5deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    75% {
+        transform: translateY(15px) rotate(-5deg);
+        opacity: 0.3;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .history-wrapper {
+        padding: 20px 15px;
+    }
+    
+    .history-item {
+        padding: 15px;
+    }
+    
+    .history-item p:first-child {
+        font-size: 15px;
+    }
+    
+    .history-item p:last-child {
+        font-size: 13px;
+    }
+    
+    .history-wrapper::before,
+    .history-wrapper::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .history-wrapper {
+        padding: 15px 10px;
+    }
+    
+    .history-item {
+        padding: 12px;
+    }
+    
+    .history-item p:first-child {
+        font-size: 14px;
+    }
+    
+    .history-item p:last-child {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .btn-delete {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .ghost {
+        display: none;
+    }
+}
+
+/* Empty state styling */
+.history-wrapper > p:not([style*="Loading"]) {
+    text-align: center;
+    padding: 40px 20px;
+    background: rgba(10, 14, 41, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: var(--text-color);
+    font-size: 18px;
+    margin-top: 30px;
+    animation: fadeIn 1s ease-out;
+}

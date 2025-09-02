@@ -1,0 +1,452 @@
+/* AdminDashboard.css - Ghost Themed Dark Animated Blue Style */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-blue: #0a0e29;
+    --secondary-blue: #0c112d;
+    --accent-blue: #00a8ff;
+    --glow-blue: #0088ff;
+    --text-color: #e0e0e0;
+    --error-color: #ff3860;
+    --success-color: #23d160;
+    --admin-accent: #9b59b6;
+}
+
+.admin-dashboard {
+    background: linear-gradient(135deg, #050722 0%, #0a1142 100%);
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Ghost animation elements */
+.admin-dashboard::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 168, 255, 0.15) 0%, rgba(0, 168, 255, 0) 70%);
+    top: 15%;
+    left: 10%;
+    animation: float 12s ease-in-out infinite;
+    z-index: 0;
+}
+
+.admin-dashboard::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 136, 255, 0.1) 0%, rgba(0, 136, 255, 0) 70%);
+    bottom: 20%;
+    right: 10%;
+    animation: float 8s ease-in-out infinite reverse;
+    z-index: 0;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-20px) translateX(15px);
+    }
+    50% {
+        transform: translateY(10px) translateX(-15px);
+    }
+    75% {
+        transform: translateY(-10px) translateX(-10px);
+    }
+}
+
+.admin-dashboard > h2 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(0, 136, 255, 0.5);
+    position: relative;
+    padding-top: 20px;
+    z-index: 1;
+}
+
+.admin-dashboard > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: var(--admin-accent);
+    box-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+}
+
+.admin-dashboard > button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1;
+    width: auto; /* Ensure button doesn't stretch */
+}
+
+.admin-dashboard > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.admin-dashboard h3 {
+    color: var(--text-color);
+    margin: 20px 0;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 500;
+    text-shadow: 0 0 5px rgba(0, 136, 255, 0.3);
+    z-index: 1;
+    position: relative;
+}
+
+/* User list styling */
+.user-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+    z-index: 1;
+    position: relative;
+}
+
+.user-item {
+    background: rgba(10, 14, 41, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 136, 255, 0.2);
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.user-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.3);
+    border-color: rgba(0, 168, 255, 0.4);
+}
+
+.user-item strong {
+    color: var(--accent-blue);
+    font-size: 18px;
+    display: block;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px rgba(0, 136, 255, 0.3);
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.user-actions button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1; /* Buttons will share available space equally */
+    min-width: 120px; /* Minimum width for buttons */
+}
+
+.btn-view {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--glow-blue) 100%);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.user-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Prompts view styling */
+.prompts-view {
+    background: rgba(10, 14, 41, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 30px;
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.3);
+    animation: fadeIn 0.5s ease-out;
+    z-index: 1;
+    position: relative;
+}
+
+.prompts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.prompts-header h3 {
+    margin: 0;
+    color: var(--admin-accent);
+    text-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
+}
+
+.btn-back {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: auto; /* Ensure button doesn't stretch */
+}
+
+.btn-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(243, 156, 18, 0.3);
+}
+
+.prompt-item {
+    background: rgba(12, 17, 45, 0.6);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.prompt-item:hover {
+    background: rgba(12, 17, 45, 0.8);
+    border-color: rgba(0, 168, 255, 0.4);
+}
+
+.prompt-item p {
+    color: var(--text-color);
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.prompt-item p strong {
+    color: var(--accent-blue);
+}
+
+.prompt-actions {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.prompt-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    width: auto; /* Ensure button doesn't stretch */
+}
+
+.prompt-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(231, 76, 60, 0.3);
+}
+
+.no-prompts {
+    text-align: center;
+    color: var(--text-color);
+    opacity: 0.7;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ghost animation elements */
+.ghost {
+    position: absolute;
+    width: 30px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50% 50% 0 0;
+    animation: ghostFloat 8s ease-in-out infinite;
+    z-index: 0;
+}
+
+.ghost::before, .ghost::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    bottom: -8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ghost::before {
+    left: 5px;
+}
+
+.ghost::after {
+    right: 5px;
+}
+
+.ghost:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.ghost:nth-child(2) {
+    top: 60%;
+    right: 10%;
+    animation-delay: 2s;
+}
+
+@keyframes ghostFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    25% {
+        transform: translateY(-15px) rotate(5deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.5;
+    }
+    75% {
+        transform: translateY(15px) rotate(-5deg);
+        opacity: 0.3;
+    }
+}
+
+/* Responsive Design - FIXED BUTTON WIDTHS */
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 15px;
+    }
+    
+    .admin-dashboard > h2 {
+        font-size: 28px;
+        margin-top: 40px;
+    }
+    
+    .user-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .user-actions {
+        flex-direction: row; /* Keep buttons side by side on tablets */
+        flex-wrap: wrap; /* Allow wrapping if needed */
+    }
+    
+    .user-actions button {
+        flex: 1; /* Buttons will share space equally */
+        min-width: 140px; /* Comfortable minimum width */
+    }
+    
+    .prompts-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .btn-back {
+        width: auto; /* Don't stretch the back button */
+        align-self: center;
+    }
+    
+    .admin-dashboard::before,
+    .admin-dashboard::after {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-dashboard {
+        padding: 10px;
+    }
+    
+    .admin-dashboard > h2 {
+        font-size: 24px;
+    }
+    
+    .admin-dashboard > button {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 20px;
+        width: auto; /* Don't stretch to full width */
+        display: inline-block;
+    }
+    
+    .user-item {
+        padding: 15px;
+    }
+    
+    .user-actions {
+        flex-direction: column; /* Stack buttons vertically on mobile */
+    }
+    
+    .user-actions button {
+        width: 100%; /* Full width buttons when stacked */
+        margin-bottom: 8px;
+    }
+    
+    .user-actions button:last-child {
+        margin-bottom: 0;
+    }
+    
+    .prompts-view {
+        padding: 15px;
+    }
+    
+    .prompt-actions button {
+        width: 100%; /* Full width for delete prompt button on mobile */
+    }
+    
+    .ghost {
+        display: none;
+    }
+}
