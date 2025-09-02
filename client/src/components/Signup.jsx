@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Signup.css';
+import '../Signup.css';
 
 const languages = [
   { code: 'en', name: 'English' },
