@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import "../History.css";
 
-// Use this BASE_URL for local development first, fallback to env variable
-const BASE_URL = "http://localhost:10000" || process.env.REACT_APP_BASE_URL;
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:10000";
+
 
 const History = ({ userId }) => {
   const [prompts, setPrompts] = useState([]);
