@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../styles/AdminDashboard.css'
+import '../AdminDashboard.css'
 
 const BASE_URL =  "http://localhost:10000"||process.env.REACT_APP_BASE_URL ;
 
