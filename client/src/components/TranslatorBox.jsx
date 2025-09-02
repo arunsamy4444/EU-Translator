@@ -34,7 +34,7 @@ const languages = [
 ];
 
 const DAILY_LIMIT = 50;
-const BASE_URL =  "http://localhost:10000"  ||   process.env.REACT_APP_BASE_URL 
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:10000";
 
 const TranslatorBox = ({ user }) => {
   const [inputText, setInputText] = useState("");
