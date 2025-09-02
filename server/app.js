@@ -8,19 +8,22 @@ const cors = require('cors');
 const app = express();
 
 const allowedOrigins = [
-  "https://eu-translator.vercel.app",  // production frontend
+  "https://eu-translator.vercel.app", // production frontend - priority
   "http://localhost:3000",             // local testing
-  "http://127.0.0.1:3000"              // sometimes needed
+  "http://127.0.0.1:3000"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow Postman/curl (no origin)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed for this origin"));
-    }
+    // allow requests with no origin (Postman, curl)
+    if (!origin) return callback(null, true);
+
+    // prioritize live URL
+    if (origin === "https://eu-translator.vercel.app") return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    callback(new Error(`CORS not allowed for origin: ${origin}`));
   },
   credentials: true
 }));
